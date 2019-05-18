@@ -5,7 +5,7 @@ welcomeMessage = True
 def main():
     global welcomeMessage
     if(welcomeMessage):
-        print('Welcome to the Criminal Law, Abstraction and Unification System: C.L.A.U.S!')
+        print('\n#### Welcome to the Criminal Law, Abstraction and Unification System: C.L.A.U.S! ####')
         welcomeMessage = False
 
 
@@ -13,8 +13,7 @@ def main():
     print('\n---- file successfully loaded ----')
     menu(df)
 
-    # --- search for crimes based on the data
-    # searchInDataframe(df, 'address', 'OCCIDENTAL')
+    # --- search for crimes based on the data CHECK
 
     # --- take lon-lat point and return list of crimes within 5km
     # checkRadius(df, 38.55, -121.41, 5)
@@ -34,7 +33,7 @@ def main():
     # writeToFile(df, 'SacramentocrimeJanuary2006_modified', 'html')
 
 def fileSetup():
-    df = input('\nPlease enter the filename of the desired list.\nEnter "default" to use the default list or enter "exit" to exit the program.\n')
+    df = input('\nPlease enter the filename of the desired list to use for this session.\nEnter "default" to use the default list or enter "exit" to exit the program.\n')
     if(df == 'default' or df == 'Default'):
         try:
             return readFromFile('SacramentocrimeJanuary2006.csv')
@@ -58,9 +57,9 @@ def fileSetup():
 
 def menu(df):
     print('\n**** MENU ****')
-    choice = input('\nPlease select one of the following options:\n1) Search for specific crimes in current list.\n2) Find all crimes committed within a specific radius of a point.\n3) Add new crime to current list.\n4) Export current list.\n5) Load new list file.\n0) Exit program.\n')
+    choice = input('\nPlease select one of the following options:\n1) Search for entries in current list.\n2) Find all entries within a specific radius of a point.\n3) Add new crime to current list.\n4) Export current list.\n5) Load new list file.\n0) Exit program.\n')
 
-    # Search for specific crimes in current list
+    # search for specific entries in current list
     if(choice == '1'):
         column = chooseColumn(df)
         searchWord = input('\nPlease enter desired search word(s) in the category "'+column+'":\n')
@@ -73,13 +72,58 @@ def menu(df):
         else:
             print('\nEntries found matching the word(s) "'+searchWord+'":\n')
             print(result)
-            while(True):
+            exportResult(df, result)
+
+
+    # find all entries within a specific radius of a point
+    elif(choice == '2'):
+        lat = float(input('\nPlease enter the latitude of the point:\n'))
+        lon = float(input('\nPlease enter the longitude of the point:\n'))
+        radius = float(input('\nPlease enter the radius in kilometers of the point you wish to search for (eg. "5"):\n'))
+        result = checkRadius(df, lat, lon, radius)
+        # checkRadius(df, 38.55, -121.41, 5)
+        if (result.empty):
+            print('\nNo entries found with the coordinates "latitude: '+str(lat)+'" "longitude: '+str(lon)+'" "radius: '+str(radius)+'".\n')
+            print('\n---- returning to menu ----\n')
+            menu(df)
+        else:
+            print('\nEntries found with the coordinates "latitude: '+str(lat)+'" "longitude: '+str(lon)+'" "radius: '+str(radius)+'":\n')
+            print(result)
+            exportResult(df, result)
+
+
+    # add new crime to current list
+    elif(choice == '3'):
+        arg1 = input()
+
+    # export current list
+    elif(choice == '4'):
+        arg1 = input()
+
+    # load new list file
+    elif(choice == '5'):
+        main()
+
+    # exit program
+    elif(choice == '0'):
+        print('Thank you and goodbye')
+        sys.exit()
+
+    # invalid entry
+    else:
+        print('\n---- invalid entry ----\n')
+        menu(df)
+
+
+
+def exportResult(df, result):
+    while(True):
                 subChoice = input('\nPlease select one of the following options:\n1) Export search results.\n2) Back to menu.\n')
                 if(subChoice == '1'):
                     fileFormat = chooseFileFormat()
                     filename = input('\nPlease enter desired filename (eg. "mySearchFile"):\n')
                     writeToFile(result, filename, fileFormat)
-                    print('\nFile successfully saved as "'+filename+'.'+fileFormat+'" in your data folder')
+                    print('\nFile successfully saved as "'+filename+'.'+fileFormat+'" in your data folder.')
                     print('\n---- returning to menu ----\n')
                     menu(df)
                 elif(subChoice == '2'):
@@ -88,42 +132,24 @@ def menu(df):
                     print('\n---- invalid entry ----\n')
 
 
-    # Find all crimes committed within a specific radius of a point
-    elif(choice == '2'):
-        arg1 = input()
-
-    # Add new crime to current list
-    elif(choice == '3'):
-        arg1 = input()
-
-    # Export current list
-    elif(choice == '4'):
-        arg1 = input()
-
-    # Load new list file
-    elif(choice == '5'):
-        main()
-
-    # Exit program
-    elif(choice == '0'):
-        print('Thank you and goodbye')
-        sys.exit()
-
-    # Invalid entry
-    else:
-        print('\n---- invalid entry ----\n')
-        menu(df)
-
 
 def chooseFileFormat():
     while(True):
-        Choice = input('\nPlease select the desired format:\n1) CSV.\n2) JSON.\n3) HTML.\n')
+        Choice = input('\nPlease select the desired file format:\n1) CSV.\n2) JSON.\n3) HTML.\n')
+
+        # csv
         if(Choice == '1'):
             return 'csv'
+
+        # json
         elif(Choice == '2'):
             return 'json'
+
+        # html
         elif(Choice == '3'):
             return 'html'
+
+        # invalid entry
         else:
             print('\n---- invalid entry ----\n')
 
@@ -204,13 +230,17 @@ def readFromFile(filename):
 
 
 def writeToFile(df, filename, fileFormat):
-    if fileFormat == 'json':
-        df.to_json('data/'+filename +'.json')
-    elif fileFormat == 'csv':
-        df.to_csv('data/'+filename +'.csv', columns=['cdatetime','address','district','beat','grid','crimedescr','ucr_ncic_code','latitude','longitude'], index=False)
-    elif fileFormat == 'html':
-        df.to_html('data/'+filename +'.html')
-
+    try:
+        if fileFormat == 'json':
+            df.to_json('data/'+filename +'.json')
+        elif fileFormat == 'csv':
+            df.to_csv('data/'+filename +'.csv', columns=['cdatetime','address','district','beat','grid','crimedescr','ucr_ncic_code','latitude','longitude'], index=False)
+        elif fileFormat == 'html':
+            df.to_html('data/'+filename +'.html')
+    except IOError:
+        print('\n---- could not create file ----\n')
+        print('\n---- returning to menu ----\n')
+        menu(df)
 
 
 def searchInDataframe(df, column, searchPhrase):
