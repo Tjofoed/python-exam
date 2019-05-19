@@ -1,55 +1,40 @@
-import pandas, math, os, sys
+import pandas, math, sys
 
 welcomeMessage = True
+currentFile = ''
 
 def main():
     global welcomeMessage
-    if(welcomeMessage):
-        print('\n#### Welcome to the Criminal Law, Abstraction and Unification System: C.L.A.U.S! ####')
-        welcomeMessage = False
+    while(True):
+        if(welcomeMessage):
+            print('\n#### Welcome to the Criminal Law, Abstraction and Unification System: C.L.A.U.S! ####')
+            welcomeMessage = False
+        df = (fileSetup())
+        print('\n---- file successfully loaded ----')
+        menu(df)
 
-
-    df = (fileSetup())
-    print('\n---- file successfully loaded ----')
-    menu(df)
-
-    # --- search for crimes based on the data CHECK
-
-    # --- take lon-lat point and return list of crimes within 5km
-    # checkRadius(df, 38.55, -121.41, 5)
-
-
-    # --- be able to add new record to file
-    # appendToFile('radiusdataframe.csv')
-
-    # --- export dataset to json and html
-    # writeToFile(df, 'json')
-    # writeToFile(df, 'csv')
-    # writeToFile(df, 'html')
-
-    # --- export search results to json and html
-    # writeToFile(df, 'SacramentocrimeJanuary2006_modified', 'json')
-    # writeToFile(df, 'SacramentocrimeJanuary2006_modified', 'csv')
-    # writeToFile(df, 'SacramentocrimeJanuary2006_modified', 'html')
 
 def fileSetup():
-    df = input('\nPlease enter the filename of the desired list to use for this session.\nEnter "default" to use the default list or enter "exit" to exit the program.\n')
-    if(df == 'default' or df == 'Default'):
+    global currentFile
+    filename = input('\nPlease enter the filename of the desired list to use for this session.\nEnter "default" to use the default list or enter "exit" to exit the program.\n')
+    if(filename == 'default' or filename == 'Default'):
         try:
             return readFromFile('SacramentocrimeJanuary2006.csv')
         except IOError:
             print('\n---- default file not available ----\n')
             fileSetup()
-    elif(df == 'exit' or df == 'Exit'):
+    elif(filename == 'exit' or filename == 'Exit'):
         print('Thank you and goodbye')
         sys.exit()
     else:
         try:
-            if(df[-4:] != '.csv'):
-                df = df+'.csv'
-                return readFromFile(df)
+            if(filename[-4:] != '.csv'):
+                filename = filename+'.csv'
+                currentFile = filename
+                return readFromFile(filename)
             else:
-                return readFromFile(df)
+                currentFile = filename
+                return readFromFile(filename)
         except IOError:
             print('\n---- invalid filename ----\n')
             fileSetup()
@@ -58,13 +43,11 @@ def fileSetup():
 def menu(df):
     print('\n**** MENU ****')
     choice = input('\nPlease select one of the following options:\n1) Search for entries in current list.\n2) Find all entries within a specific radius of a point.\n3) Add new crime to current list.\n4) Export current list.\n5) Load new list file.\n0) Exit program.\n')
-
     # search for specific entries in current list
     if(choice == '1'):
         column = chooseColumn(df)
         searchWord = input('\nPlease enter desired search word(s) in the category "'+column+'":\n')
         result = searchInDataframe(df, column, searchWord)
-
         if (result.empty):
             print('\nNo entries found with the word(s) "'+searchWord+'".\n')
             print('\n---- returning to menu ----\n')
@@ -94,31 +77,26 @@ def menu(df):
 
     # add new crime to current list
     elif(choice == '3'):
-        arg1 = input()
-
+        appendToFile(df)
     # export current list
     elif(choice == '4'):
-        arg1 = input()
-
+        exportCurrentList(df)
     # load new list file
     elif(choice == '5'):
         main()
-
     # exit program
     elif(choice == '0'):
         print('Thank you and goodbye')
         sys.exit()
-
     # invalid entry
     else:
         print('\n---- invalid entry ----\n')
         menu(df)
 
 
-
 def exportResult(df, result):
     while(True):
-                subChoice = input('\nPlease select one of the following options:\n1) Export search results.\n2) Back to menu.\n')
+                subChoice = input('\nPlease select one of the following options:\n1) Export search results.\n0) Back to menu.\n')
                 if(subChoice == '1'):
                     fileFormat = chooseFileFormat()
                     filename = input('\nPlease enter desired filename (eg. "mySearchFile"):\n')
@@ -126,90 +104,89 @@ def exportResult(df, result):
                     print('\nFile successfully saved as "'+filename+'.'+fileFormat+'" in your data folder.')
                     print('\n---- returning to menu ----\n')
                     menu(df)
-                elif(subChoice == '2'):
+                elif(subChoice == '0'):
                     menu(df)
                 else:
                     print('\n---- invalid entry ----\n')
 
 
+def exportCurrentList(df):
+    fileFormat = chooseFileFormat()
+    filename = input('\nPlease enter desired filename (eg. "mySearchFile"):\n')
+    writeToFile(df, filename, fileFormat)
+    print('\nFile successfully saved as "'+filename+'.'+fileFormat+'" in your data folder.')
+    print('\n---- returning to menu ----\n')
+    menu(df)
+
 
 def chooseFileFormat():
     while(True):
         Choice = input('\nPlease select the desired file format:\n1) CSV.\n2) JSON.\n3) HTML.\n')
-
         # csv
         if(Choice == '1'):
             return 'csv'
-
         # json
         elif(Choice == '2'):
             return 'json'
-
         # html
         elif(Choice == '3'):
             return 'html'
-
         # invalid entry
         else:
             print('\n---- invalid entry ----\n')
 
 
-
 def chooseColumn(df):
     choice = input('\nPlease select one of the following categories to search in:\n1) cdatetime.\n2) address.\n3) district.\n4) beat.\n5) grid.\n6) crimedescr.\n7) ucr_ncic_code.\n8) latitude.\n9) longitude.\n0) Back to menu.\n')
-
     # cdatetime
     if(choice == '1'):
         return 'cdatetime'
-
     # address
     elif(choice == '2'):
         return 'address'
-
     # district
     elif(choice == '3'):
         return 'district'
-
     # beat
     elif(choice == '4'):
         return 'beat'
-
     # grid
     elif(choice == '5'):
         return 'grid'
-
     # crimedescr
     elif(choice == '6'):
         return 'crimedescr'
-
     # ucr_ncic_code
     elif(choice == '7'):
         return 'ucr_ncic_code'
-
     # latitude
     elif(choice == '8'):
         return 'latitude'
-
     # longitude
     elif(choice == '9'):
         return 'longitude'
-
     # back
     elif(choice == '0'):
         print('\n---- returning to menu ----')
         menu(df)
-
     # invalid entry
     else:
         print('\n---- invalid entry ----\n')
         chooseColumn(df)
 
 
-
-def appendToFile(filename):
-    appendDf = pandas.DataFrame({'cdatetime':['test'],'address':['test'],'district':['test'],'beat':['test'],'grid':['test'],'crimedescr':['test'],'ucr_ncic_code':['test'],'latitude':['test'],'longitude':['test']})
-    appendDf.to_csv(filename, mode='a', header=False)
-
+def appendToFile(df):
+    global currentFile
+    appendDf = pandas.DataFrame({'cdatetime':[input('\nPlease enter data for the category "cdatetime":\n')],'address':[input('\nPlease enter data for the category "address":\n')],'district':[input('\nPlease enter data for the category "district":\n')],'beat':[input('\nPlease enter data for the category "beat":\n')],'grid':[input('\nPlease enter data for the category "grid":\n')],'crimedescr':[input('\nPlease enter data for the category "crimedescr":\n')],'ucr_ncic_code':[input('\nPlease enter data for the category "ucr_ncic_code":\n')],'latitude':[input('\nPlease enter data for the category "latitude":\n')],'longitude':[input('\nPlease enter data for the category "longitude":\n')]})
+    try:
+        appendDf.to_csv('data/'+currentFile, mode='a', header=False, index=False)
+        print('\nSuccessfully added data to file "'+currentFile+'":\n'+appendDf)
+        print('\n---- returning to menu ----\n')
+        menu(df)
+    except IOError:
+        print('\n---- could not add to file ----\n')
+        print('\n---- returning to menu ----\n')
+        menu(df)
 
 
 def checkRadius(df, lat, lon, radius):
@@ -223,10 +200,8 @@ def checkRadius(df, lat, lon, radius):
     return radiusDf
 
 
-
 def readFromFile(filename):
     return pandas.read_csv('data/'+filename, encoding="latin1")
-
 
 
 def writeToFile(df, filename, fileFormat):
@@ -244,8 +219,7 @@ def writeToFile(df, filename, fileFormat):
 
 
 def searchInDataframe(df, column, searchPhrase):
-    return df.loc[df[column].str.contains(searchPhrase.upper())]
-
+    return df.loc[df[column].astype(str).str.contains(searchPhrase.upper())]
 
 
 if __name__== "__main__":
