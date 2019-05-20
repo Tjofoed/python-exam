@@ -3,7 +3,6 @@
 -- by Mikkel Oksen
 
 
-
 ##### Help the police find the criminals
 
 Based on the dataset in the [SacramentocrimeJanuary2006.csv](data/SacramentocrimeJanuary2006.csv) file you should create a console application.  
