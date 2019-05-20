@@ -2,8 +2,11 @@
 
 -- by Mikkel Oksen
 
+##### The application is a terminal based Criminal Law, Abstraction and Unification System known as "C.L.A.U.S"
+- To run the program, run the [main.py](main.py) file.
+- To test the program, run the [test_main.py](test_main.py) file.
 
-##### Help the police find the criminals
+##### Assignment 4 - Help the police find the criminals.
 
 Based on the dataset in the [SacramentocrimeJanuary2006.csv](data/SacramentocrimeJanuary2006.csv) file you should create a console application.  
 
