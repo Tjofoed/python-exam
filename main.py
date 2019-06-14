@@ -19,20 +19,20 @@ def main():
 def fileSetup():
     # allows the user to select a custom csv file or the default provided
     filename = input('\nPlease enter the filename of the desired list to use for this session.\nEnter "default" to use the default list or enter "exit" to exit the program.\n')
-    if(filename == 'default' or filename == 'Default'):
+    if(filename.lower() == 'default'):
         try:
             return readFromFile('SacramentocrimeJanuary2006.csv')
         except IOError:
             print('\n---- default file not available ----\n')
             fileSetup()
-    elif(filename == 'exit' or filename == 'Exit'):
+    elif(filename.lower() == 'exit'):
         print('\nThank you and goodbye.')
         sys.exit()
     else:
         try:
             # adds '.csv' to filename if user input doesn't match csv format and reads file
-            if(filename[-4:] != '.csv'):
-                filename = filename+'.csv'
+            if not (filename.lower().endswith('.csv')):
+                filename = f'{filename}.csv'
                 return readFromFile(filename)
             else:
                 return readFromFile(filename)
@@ -49,16 +49,16 @@ def menu(df):
     # search for specific entries in current list
     if(choice == '1'):
         column = chooseColumn(df)
-        searchWord = input('\nPlease enter desired search word(s) in the category "'+column+'":\n')
+        searchWord = input(f'\nPlease enter desired search word(s) in the category "{column}":\n')
         # runs search method and saves as result
         result = searchInDataframe(df, column, searchWord)
         # prints out message based on search results
         if (result.empty):
-            print('\nNo entries found with the word(s) "'+searchWord+'".\n')
+            print(f'\nNo entries found with the word(s) "{searchWord}".\n')
             print('\n---- returning to menu ----\n')
             menu(df)
         else:
-            print('\nEntries found matching the word(s) "'+searchWord+'":\n')
+            print(f'\n{len(result)} Entries found matching the word(s) "{searchWord}":\n')
             print(result)
             exportResult(df, result)
 
@@ -72,11 +72,11 @@ def menu(df):
         result = checkRadius(df, lat, lon, radius)
         # prints out message based on search results
         if (result.empty):
-            print('\nNo entries found with the coordinates "latitude: '+str(lat)+'" "longitude: '+str(lon)+'" "radius: '+str(radius)+'".\n')
+            print(f'\nNo entries found with the coordinates "latitude: {str(lat)}" "longitude: {str(lon)}" "radius: {str(radius)}km".\n')
             print('\n---- returning to menu ----\n')
             menu(df)
         else:
-            print('\nEntries found with the coordinates "latitude: '+str(lat)+'" "longitude: '+str(lon)+'" "radius: '+str(radius)+'":\n')
+            print(f'\nEntries found with the coordinates "latitude: {str(lat)}" "longitude: {str(lon)}" "radius: {str(radius)}km":\n')
             print(result)
             exportResult(df, result)
 
@@ -110,7 +110,7 @@ def exportResult(df, result):
             filename = input('\nPlease enter desired filename (eg. "mySearchFile"):\n')
             # runs write to file method with result file and returns to menu
             writeToFile(result, filename, fileFormat)
-            print('\nFile successfully saved as "'+filename+'.'+fileFormat+'" in your data folder.')
+            print(f'\nFile successfully saved as "{filename}.{fileFormat}" in your data folder.')
             print('\n---- returning to menu ----\n')
             menu(df)
         elif(subChoice == '0'):
@@ -125,7 +125,7 @@ def exportCurrentList(df):
     filename = input('\nPlease enter desired filename (eg. "mySearchFile"):\n')
     writeToFile(df, filename, fileFormat)
     # runs write to file method and returns to menu
-    print('\nFile successfully saved as "'+filename+'.'+fileFormat+'" in your data folder.')
+    print(f'\nFile successfully saved as "{filename}.{fileFormat}" in your data folder.')
     print('\n---- returning to menu ----\n')
     menu(df)
 
@@ -193,8 +193,8 @@ def appendToFile(df):
     appendDf = pandas.DataFrame({'cdatetime':[input('\nPlease enter data for the category "cdatetime":\n').upper()],'address':[input('\nPlease enter data for the category "address":\n').upper()],'district':[input('\nPlease enter data for the category "district":\n').upper()],'beat':[input('\nPlease enter data for the category "beat":\n').upper()],'grid':[input('\nPlease enter data for the category "grid":\n').upper()],'crimedescr':[input('\nPlease enter data for the category "crimedescr":\n').upper()],'ucr_ncic_code':[input('\nPlease enter data for the category "ucr_ncic_code":\n').upper()],'latitude':[input('\nPlease enter data for the category "latitude":\n').upper()],'longitude':[input('\nPlease enter data for the category "longitude":\n').upper()]})
     try:
         # appending user created DataFrame object to current list
-        appendDf.to_csv('data/'+currentFile, mode='a', header=False, index=False)
-        print('\nSuccessfully added data to file "'+currentFile+'":\n')
+        appendDf.to_csv(f'data/{currentFile}', mode='a', header=False, index=False)
+        print(f'\nSuccessfully added data to file "{currentFile}":\n')
         print(appendDf)
         print('\n---- returning to menu ----\n')
         menu(df)
@@ -227,11 +227,11 @@ def writeToFile(df, filename, fileFormat):
     try:
         # saving files as the different formats
         if fileFormat == 'json':
-            df.to_json('data/'+filename +'.json')
+            df.to_json(f'data/{filename}.json')
         elif fileFormat == 'csv':
-            df.to_csv('data/'+filename +'.csv', columns=['cdatetime','address','district','beat','grid','crimedescr','ucr_ncic_code','latitude','longitude'], index=False)
+            df.to_csv(f'data/{filename}.csv', columns=['cdatetime','address','district','beat','grid','crimedescr','ucr_ncic_code','latitude','longitude'], index=False)
         elif fileFormat == 'html':
-            df.to_html('data/'+filename +'.html')
+            df.to_html(f'data/{filename}.html')
     except IOError:
         print('\n---- could not create file ----\n')
         print('\n---- returning to menu ----\n')
