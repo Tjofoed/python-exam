@@ -9,7 +9,7 @@ def main():
     while(True):
         # prints out welcome message the first time the program runs
         if(welcomeMessage):
-            print('\n#### Welcome to the Criminal Law, Abstraction and Unification System: C.L.A.U.S! ####')
+            print('\n**** Welcome to the Criminal Law, Abstraction and Unification System: C.L.A.U.S! ****')
             welcomeMessage = False
         df = (fileSetup())
         print('\n---- file successfully loaded ----')
