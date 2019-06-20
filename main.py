@@ -66,9 +66,24 @@ def menu(df):
     # find all entries within a specific radius of a point
     elif(choice == '2'):
         # saves user input as floats to use in the check method
-        lat = float(input('\nPlease enter the latitude of the point:\n'))
-        lon = float(input('\nPlease enter the longitude of the point:\n'))
-        radius = float(input('\nPlease enter the radius in kilometers of the point you wish to search for (eg. "5"):\n'))
+        while(True):
+            try:
+                lat = float(input('\nPlease enter the latitude of the point:\n'))
+                break
+            except:
+                print('\n---- invalid entry ----')
+        while(True):
+            try:
+                lon = float(input('\nPlease enter the longitude of the point:\n'))
+                break
+            except:
+                print('\n---- invalid entry ----')
+        while(True):
+            try:
+                radius = float(input('\nPlease enter the radius in kilometers of the point you wish to search for (eg. "5"):\n'))
+                break
+            except:
+                print('\n---- invalid entry ----')
         result = checkRadius(df, lat, lon, radius)
         # prints out message based on search results
         if (result.empty):
@@ -220,7 +235,7 @@ def readFromFile(filename):
     # instantiating and saving global file by parameter
     global currentFile
     currentFile = filename
-    return pandas.read_csv('data/'+filename)
+    return pandas.read_csv(f'data/{filename}')
 
 
 def writeToFile(df, filename, fileFormat):
